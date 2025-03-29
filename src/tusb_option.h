@@ -493,6 +493,10 @@
   #define CFG_TUD_MSC             0
 #endif
 
+#ifndef CFG_TUD_MTP
+  #define CFG_TUD_MTP             0
+#endif
+
 #ifndef CFG_TUD_HID
   #define CFG_TUD_HID             0
 #endif
@@ -634,6 +638,10 @@
 
 #ifndef CFG_TUH_MSC
   #define CFG_TUH_MSC    0
+#endif
+
+#ifndef CFG_TUH_MTP
+  #define CFG_TUH_MTP    0
 #endif
 
 #ifndef CFG_TUH_VENDOR
