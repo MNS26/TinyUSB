@@ -8,7 +8,6 @@
 #include "ptp_device.h"
 
 void ptp_init(void) {
-#warning xasdcfgvhjkl
 }
 
 bool ptp_deinit(void) {
@@ -23,7 +22,7 @@ uint16_t ptp_open(uint8_t rhport, tusb_desc_interface_t const * itf_desc, uint16
 }
 
 bool ptp_control_xfer_cb (uint8_t rhport, uint8_t stage, tusb_control_request_t const * p_request) {
-  return true
+  return true;
 }
 
 bool ptp_xfer_cb (uint8_t rhport, uint8_t ep_addr, xfer_result_t event, uint32_t xferred_bytes) {

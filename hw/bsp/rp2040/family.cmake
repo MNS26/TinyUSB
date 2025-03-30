@@ -95,6 +95,7 @@ target_sources(tinyusb_device_base INTERFACE
 		${TOP}/src/class/hid/hid_device.c
 		${TOP}/src/class/midi/midi_device.c
 		${TOP}/src/class/msc/msc_device.c
+		${TOP}/src/class/ptp/ptp_device.c
 		${TOP}/src/class/net/ecm_rndis_device.c
 		${TOP}/src/class/net/ncm_device.c
 		${TOP}/src/class/usbtmc/usbtmc_device.c
@@ -115,6 +116,7 @@ target_sources(tinyusb_host_base INTERFACE
 		${TOP}/src/class/hid/hid_host.c
 		${TOP}/src/class/midi/midi_host.c
 		${TOP}/src/class/msc/msc_host.c
+		${TOP}/src/class/ptp/ptp_host.c
 		${TOP}/src/class/vendor/vendor_host.c
 		)
 
