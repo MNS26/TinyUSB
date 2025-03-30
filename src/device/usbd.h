@@ -269,16 +269,16 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
   7, TUSB_DESC_ENDPOINT, _epin, TUSB_XFER_BULK, U16_TO_U8S_LE(_epsize), 0
 
 //--------------------------------------------------------------------+
-// MTP Descriptor Templates
+// PTP Descriptor Templates
 //--------------------------------------------------------------------+
 
 // Length of template descriptor: 30 bytes
-#define TUD_MTP_DESC_LEN    (9 + 7 + 7 + 7)
+#define TUD_PTP_DESC_LEN    (9 + 7 + 7 + 7)
 
 // Interface number, string index, EP Out & EP In address, EP size
-#define TUD_MTP_DESCRIPTOR(_itfnum, _stridx, _ep_notif, _epout, _epin, _epsize,_ep_notif_size) \
+#define TUD_PTP_DESCRIPTOR(_itfnum, _stridx, _ep_notif, _epout, _epin, _epsize,_ep_notif_size) \
   /* Interface */\
-  9, TUSB_DESC_INTERFACE, _itfnum, 0, 3, TUSB_CLASS_IMAGE, MTP_SUBCLASS_STILL_IMAGE, MTP_PROTOCOL_BOT, _stridx,\
+  9, TUSB_DESC_INTERFACE, _itfnum, 0, 3, TUSB_CLASS_IMAGE, PTP_SUBCLASS_STILL_IMAGE, PTP_PROTOCOL_BOT, _stridx,\
   /* Endpoint Out */\
   7, TUSB_DESC_ENDPOINT, _epout, TUSB_XFER_BULK, U16_TO_U8S_LE(_epsize), 0,\
   /* Endpoint In */\
