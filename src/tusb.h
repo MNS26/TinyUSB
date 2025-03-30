@@ -55,7 +55,7 @@
     #include "class/msc/msc_host.h"
   #endif
 
-  #if CFG_TUH_TPT
+  #if CFG_TUH_PTP
     #include "class/ptp/ptp_host.h"
   #endif
 

@@ -9,7 +9,6 @@
  extern "C" {
 #endif
 
-
 void     ptp_init            (void);
 bool     ptp_deinit          (void);
 void     ptp_reset           (uint8_t rhport);

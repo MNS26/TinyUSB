@@ -8,31 +8,25 @@
 #include "ptp_device.h"
 
 void ptp_init(void) {
-  puts("");
-
+#warning xasdcfgvhjkl
 }
 
 bool ptp_deinit(void) {
-  puts("");
   return true;
 }
 
 void ptp_reset(uint8_t rhport) {
-  puts("");
 }
 
 uint16_t ptp_open(uint8_t rhport, tusb_desc_interface_t const * itf_desc, uint16_t max_len) {
-  puts("");
   return 0;
 }
 
 bool ptp_control_xfer_cb (uint8_t rhport, uint8_t stage, tusb_control_request_t const * p_request) {
-  puts("");
   return true
 }
 
 bool ptp_xfer_cb (uint8_t rhport, uint8_t ep_addr, xfer_result_t event, uint32_t xferred_bytes) {
-  puts("");
   return true;
 }
 
