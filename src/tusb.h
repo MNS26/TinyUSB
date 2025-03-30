@@ -55,12 +55,8 @@
     #include "class/msc/msc_host.h"
   #endif
 
-  #if CFG_TUH_TPT || CFG_TUH_MTP
+  #if CFG_TUH_TPT
     #include "class/ptp/ptp_host.h"
-  #endif
-
-  #if CFG_TUH_MTP
-    #include "class/ptp/mtp_host.h"
   #endif
 
   #if CFG_TUH_CDC
@@ -96,12 +92,8 @@
     #include "class/msc/msc_device.h"
   #endif
 
-  #if CFG_TUD_PTP || CFG_TUD_MTP
+  #if CFG_TUD_PTP
     #include "class/ptp/ptp_device.h"
-  #endif
-
-  #if CFG_TUD_MTP
-    #include "class/ptp/mtp_device.h"
   #endif
 
   #if CFG_TUD_AUDIO

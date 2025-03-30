@@ -180,6 +180,19 @@ tu_static usbd_class_driver_t const _usbd_driver[] = {
     },
     #endif
 
+    #if CFG_TUD_PTP
+    {
+        .name             = DRIVER_NAME("PTP"),
+        .init             = ptp_init,
+        .deinit           = ptp_deinit,
+        .reset            = ptp_reset,
+        .open             = ptp_open,
+        .control_xfer_cb  = ptp_control_xfer_cb,
+        .xfer_cb          = ptp_xfer_cb,
+        .sof              = NULL
+    },
+    #endif
+
     #if CFG_TUD_HID
     {
         .name             = DRIVER_NAME("HID"),
