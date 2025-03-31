@@ -27,16 +27,24 @@ typedef enum {
   PTP_CONTAINER_TYPE_DATA = 0x02,
   PTP_CONTAINER_TYPE_RESPNSE = 0x03,
   PTP_CONTAINER_TYPE_EVENT = 0x04,
-} tud_ptp_container_t;
+} ptp_container_type_t;
+
+//typedef enum {
+//  PTP_CONTAINER_LENGTH_OFFSET = 0x00,
+//  PTP_CONTAINER_TYPE_OFFSET = 0x04,
+//  PTP_CONTAINER_CODE_OFFSET = 0x06,
+//  PTP_CONTAINER_TRANSACTION_ID_OFFSET = 0x08,
+//  PTP_CONTAINER_PARAMETER_OFFSET = 0x0C,
+//  PTP_CONTAINER_HEADER_SIZE = 0x0C,
+//} tud_ptp_container_offset_t;
 
 typedef enum {
-  PTP_CONTAINER_LENGTH_OFFSET = 0x00,
-  PTP_CONTAINER_TYPE_OFFSET = 0x04,
-  PTP_CONTAINER_CODE_OFFSET = 0x06,
-  PTP_CONTAINER_TRANSACTION_ID_OFFSET = 0x08,
-  PTP_CONTAINER_PARAMETER_OFFSET = 0x0C,
-  PTP_CONTAINER_HEADER_SIZE = 0x0C,
-} tud_ptp_container_offset_t;
+  PTP_REQ_CANCEL = 0x64,
+  PTP_REQ_GET_EXTENDED_EVENT_DATA = 0x65,
+  PTP_REQ_DEVICE_RESET = 0x66,
+  PTP_REQ_GET_DEVICE_STATUS = 0x67,
+} ptp_request_t;
+
 
 typedef enum {
   PTP_OPERATION_GET_DEVICE_INFO              = 0x1001,
@@ -78,7 +86,7 @@ typedef enum {
   PTP_OPERATION_GET_OBJECT_REFERENCES        = 0x9810,
   PTP_OPERATION_SET_OBJECT_REFERENCES        = 0x9811,
   PTP_OPERATION_SKIP                         = 0x9820
-} tud_ptp_operation_codes_t;
+} ptp_operation_codes_t;
 
 typedef enum{
   PTP_PROPERTY_STORAGE_ID        = 0xDC01,
@@ -91,7 +99,7 @@ typedef enum{
   PTP_PROPERTY_PARENT_OBJECT     = 0xDC0B,
   PTP_PROPERTY_PERSISTENT_UID    = 0xDC41,
   PTP_PROPERTY_NAME              = 0xDC44
-} tud_ptp_property_codes_t;
+} ptp_property_codes_t;
 
 typedef enum {
   PTP_EVENT_UNDEFINED                 = 0x4000,
@@ -112,7 +120,7 @@ typedef enum {
   PTP_EVENT_OBJECT_PROP_CHANGED       = 0xC801,
   PTP_EVENT_OBJECT_PROP_DESC_CHANGED  = 0xC802,
   PTP_EVENT_OBJECT_REFERENCES_CHANGED = 0xC803,
-} tud_ptp_event_codes_t;
+} ptp_event_codes_t;
 
 typedef enum {
   PTP_RESPONSE_UNDEFINED                                = 0x2000,
@@ -158,10 +166,49 @@ typedef enum {
   PTP_RESPONSE_SPECIFICATION_BY_DEPTH_UNSUPPORTED       = 0xA808,
   PTP_RESPONSE_OBJECT_TOO_LARGE                         = 0xA809,
   PTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED                = 0xA80A
-} tud_ptp_response_codes_t;
+} ptp_response_codes_t;
 
+typedef struct TU_ATTR_PACKED {
+  uint16_t cancel_code;
+  uint32_t transaction_id;
+} ptp_cancel_request_t;
 
+// To hold the parameters
+typedef struct TU_ATTR_PACKED {
+  uint16_t size; ///< represents the byte size of the pointer
+  void* value;
+} extended_event_parameters_t;
 
+typedef struct TU_ATTR_PACKED {
+  uint16_t event_code;
+  uint32_t transaction_id;
+  uint16_t num_of_parameters;
+  extended_event_parameters_t* parameters;
+} ptp_get_extended_event_t;
+
+// Device Status Data
+typedef struct TU_ATTR_PACKED {
+  uint16_t length;
+  uint16_t code;
+  void* parameters[];
+} ptp_dsd_t;
+
+// Generic Container
+typedef struct TU_ATTR_PACKED
+{
+  uint32_t container_length;
+  uint32_t container_type;
+  uint16_t code;
+  uint32_t transaction_id;
+  uint32_t* payload[];
+} ptp_generic_container_t;
+
+// Command/Response Block Payload
+// length can be determined by doing (length container - 12)/4
+//typedef struct TU_ATTR_PACKED {
+//  union{};
+//  uint32_t paramter[];
+//} ptp_cbp_t, ptp_rbp_t;
 
 
 #ifdef __cplusplus
