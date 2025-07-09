@@ -514,6 +514,64 @@ host_test = [
 ]
 
 
+def test_example(board, f1, example):
+    """
+    Test example firmware
+    :param board: board dict
+    :param f1: flags on
+    :param example: example name
+    :return: 0 if success/skip, 1 if failed
+    """
+    name = board['name']
+    err_count = 0
+
+    f1_str = ""
+    if f1 != "":
+        f1_str = '-f1_' + f1.replace(' ', '_')
+
+    fw_dir = f'{TINYUSB_ROOT}/cmake-build/cmake-build-{name}{f1_str}/{example}'
+    if not os.path.exists(fw_dir):
+        fw_dir = f'{TINYUSB_ROOT}/examples/cmake-build-{name}{f1_str}/{example}'
+    fw_name = f'{fw_dir}/{os.path.basename(example)}'
+    print(f'{name+f1_str:40} {example:30} ...', end='')
+
+    if not os.path.exists(fw_dir) or not (os.path.exists(f'{fw_name}.elf') or os.path.exists(f'{fw_name}.bin')):
+        print('Skip (no binary)')
+        return 0
+
+    if verbose:
+        print(f'Flashing {fw_name}.elf')
+
+    # flash firmware. It may fail randomly, retry a few times
+    max_rety = 3
+    start_s = time.time()
+    for i in range(max_rety):
+        ret = globals()[f'flash_{board["flasher"]["name"].lower()}'](board, fw_name)
+        if ret.returncode == 0:
+            try:
+                globals()[f'test_{example.replace("/", "_")}'](board)
+                print('  OK', end='')
+                break
+            except Exception as e:
+                if i == max_rety - 1:
+                    err_count += 1
+                    print(f'{STATUS_FAILED}: {e}')
+                else:
+                    print(f'\n  Test failed: {e}, retry {i+2}/{max_rety}', end='')
+                    time.sleep(0.5)
+        else:
+            print(f'\n  Flash failed, retry {i+2}/{max_rety}', end='')
+            time.sleep(0.5)
+
+    if ret.returncode != 0:
+        err_count += 1
+        print(f'  Flash {STATUS_FAILED}', end='')
+
+    print(f'  in {time.time() - start_s:.1f}s')
+
+    return err_count
+
+
 def test_board(board):
     name = board['name']
     flasher = board['flasher']
@@ -537,59 +595,19 @@ def test_board(board):
                     test_list.remove(skip)
                     print(f'{name:25} {skip:30} ... Skip')
 
-    # board_test is added last to disable board's usb
-    test_list.append('device/board_test')
-
     err_count = 0
     flags_on_list = [""]
     if 'build' in board and 'flags_on' in board['build']:
         flags_on_list = board['build']['flags_on']
 
     for f1 in flags_on_list:
-        f1_str = ""
-        if f1 != "":
-            f1_str = '-f1_' + f1.replace(' ', '_')
         for test in test_list:
-            fw_dir = f'{TINYUSB_ROOT}/cmake-build/cmake-build-{name}{f1_str}/{test}'
-            if not os.path.exists(fw_dir):
-                fw_dir = f'{TINYUSB_ROOT}/examples/cmake-build-{name}{f1_str}/{test}'
-            fw_name = f'{fw_dir}/{os.path.basename(test)}'
-            print(f'{name+f1_str:40} {test:30} ... ', end='')
+            err_count += test_example(board, f1, test)
 
-            if not os.path.exists(fw_dir) or not (os.path.exists(f'{fw_name}.elf') or os.path.exists(f'{fw_name}.bin')):
-                print('Skip (no binary)')
-                continue
+    # flash board_test last to disable board's usb
+    test_example(board, flags_on_list[0], 'device/board_test')
 
-            if verbose:
-                print(f'Flashing {fw_name}.elf')
-
-            # flash firmware. It may fail randomly, retry a few times
-            max_rety = 2
-            for i in range(max_rety):
-                ret = globals()[f'flash_{flasher["name"].lower()}'](board, fw_name)
-                if ret.returncode == 0:
-                    try:
-                        globals()[f'test_{test.replace("/", "_")}'](board)
-                        print('OK')
-                        break
-                    except Exception as e:
-                        if i == max_rety - 1:
-                            err_count += 1
-                            print(STATUS_FAILED)
-                            print(f'  {e}')
-                        else:
-                            print()
-                            print(f'  Test failed: {e}, retry {i+2}/{max_rety}')
-                            time.sleep(1)
-                else:
-                    print(f'Flashing failed, retry {i+2}/{max_rety}')
-                    time.sleep(1)
-
-            if ret.returncode != 0:
-                err_count += 1
-                print(f'Flash {STATUS_FAILED}')
-
-    return err_count
+    return name, err_count
 
 
 def main():
@@ -603,11 +621,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('config_file', help='Configuration JSON file')
     parser.add_argument('-b', '--board', action='append', default=[], help='Boards to test, all if not specified')
+    parser.add_argument('-s', '--skip', action='append', default=[], help='Skip boards from test')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     args = parser.parse_args()
 
     config_file = args.config_file
     boards = args.board
+    skip_boards = args.skip
     verbose = args.verbose
 
     # if config file is not found, try to find it in the same directory as this script
@@ -617,12 +637,22 @@ def main():
         config = json.load(f)
 
     if len(boards) == 0:
-        config_boards = config['boards']
+        config_boards = [e for e in config['boards'] if e['name'] not in skip_boards]
     else:
         config_boards = [e for e in config['boards'] if e['name'] in boards]
 
+    err_count = 0
     with Pool(processes=os.cpu_count()) as pool:
-        err_count = sum(pool.map(test_board, config_boards))
+        mret = pool.map(test_board, config_boards)
+        err_count = sum(e[1] for e in mret)
+        # generate skip list for next re-run if failed
+        skip_fname = f'{config_file}.skip'
+        if err_count > 0:
+            skip_boards += [name for name, err in mret if err == 0]
+            with open(skip_fname, 'w') as f:
+                f.write(' '.join(f'-s {i}' for i in skip_boards))
+        elif os.path.exists(skip_fname):
+            os.remove(skip_fname)
 
     duration = time.time() - duration
     print()
